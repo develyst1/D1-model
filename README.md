@@ -23,8 +23,20 @@
 |---|---|
 | [docs/d1-model.md](docs/d1-model.md) | วิสัยทัศน์เต็มของโปรเจกต์, สถาปัตยกรรม Hardware (ESP32-S3 / Pi 5 / Backend), แนวคิด Modular Body, รายการ Action ที่รองรับ, เป้าหมายระยะยาว |
 | [docs/d1-model-pc-version.md](docs/d1-model-pc-version.md) | แผนช่วง Development ที่ใช้ PC แทน Raspberry Pi 5 ชั่วคราว, ความแตกต่างจากเวอร์ชัน Pi 5, ขั้นตอน Migration ไป Pi 5 จริง |
+| [backend/README.md](backend/README.md) | วิธีติดตั้ง/รัน Backend API Server พร้อมรายการ endpoint |
+
+## Backend API Server
+
+[backend/](backend/) คือโค้ดจริงส่วนแรกของโปรเจกต์ — Backend API ที่เก็บ Conversation History
+(PostgreSQL) และเรียก AI ผ่าน [AI Develyst gateway](../develyst-ai)
+
+- **Stack**: Bun + Hono + TypeScript + PostgreSQL
+- **Endpoint หลัก**: `POST /chat` (ดูประวัติ + สร้าง system prompt ตาม profile + เรียก AI),
+  CRUD `profiles` / `conversations` / `messages`
+- วิธีรัน: ดู [backend/README.md](backend/README.md)
 
 ## สถานะปัจจุบัน
 
-🟡 **Planning stage** — ยังอยู่ในขั้นตอนวางแผน/ออกแบบ ยังไม่มีฮาร์ดแวร์ Pi 5 จริง
-จึงพัฒนาบน [PC Version](docs/d1-model-pc-version.md) ไปก่อน แล้วค่อย migrate ไปยัง Pi 5 ทีหลัง
+🟢 **Backend ใช้งานได้แล้ว** (เวอร์ชัน PC, ยังไม่มีฮาร์ดแวร์ Pi 5 จริง)
+ส่วน robot-brain และ ESP32 firmware ยังอยู่ในขั้นตอนวางแผน — ดู [PC Version](docs/d1-model-pc-version.md)
+สำหรับแผนการพัฒนาก่อน migrate ไป Pi 5

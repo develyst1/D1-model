@@ -11,7 +11,8 @@
 ฟังก์ชันหลักของหุ่นคือการ **สนทนาโต้ตอบด้วย AI** และ **หันหน้าตามคำสั่ง/บทสนทนา**
 โดยอิงจากการเรียก AI ผ่าน Backend API (แนวทาง Online-First ไม่ใช่ on-device inference)
 
-> สถานะตอนนี้: **เอกสารวางแผน/วิสัยทัศน์เท่านั้น — ยังไม่มีโค้ดจริงใน repo นี้**
+> สถานะตอนนี้: **มีโค้ดจริงแล้วส่วนหนึ่ง** — [backend/](backend/) (Backend API Server)
+> ส่วนที่เหลือ (robot-brain, ESP32 firmware) ยังเป็นเอกสารวางแผน/วิสัยทัศน์
 
 ## เอกสารอ้างอิงหลัก
 
@@ -20,6 +21,21 @@
   รายการ Action ที่หุ่นต้องรองรับ, แนวคิด Modular Body)
 - [docs/d1-model-pc-version.md](docs/d1-model-pc-version.md) — แผนช่วงพัฒนาก่อนมี Pi 5 จริง
   (ใช้ PC แทน Pi 5 ชั่วคราว) พร้อมแผน migration ไป Pi 5
+- [backend/README.md](backend/README.md) — วิธีรัน/endpoint ของ Backend API Server ที่มีโค้ดจริงแล้ว
+
+## Backend API Server (มีโค้ดจริงแล้ว)
+
+[backend/](backend/) คือ "Backend API" ตามที่ระบุไว้ใน [docs/d1-model.md](docs/d1-model.md):
+เก็บ Conversation History (PostgreSQL CRUD) และพร็อกซีไปยัง **AI API Center**
+(= [develyst-ai](../develyst-ai) gateway ที่ normalize หลาย provider เป็น `AIResponse` เดียวกัน)
+
+- **Stack**: Bun + Hono + TypeScript + PostgreSQL (`Bun.sql` — ไม่ใช้ ORM)
+- **Entities**: `profiles` (display_name/gender/style), `conversations`, `messages`
+- **Endpoint หลัก**: `POST /chat` — robot-brain เรียกเพื่อส่งข้อความ, ระบบจะสร้าง system prompt
+  จาก profile (gender/style) ให้ AI ตอบในโทนที่เหมาะกับผู้ใช้แต่ละคน, persist ประวัติ,
+  แล้วเรียก AI gateway
+- รัน `bun run dev` ใน `backend/` (ต้องรัน [develyst-ai](../develyst-ai) คู่กันด้วยเพื่อให้ `/chat` ทำงาน)
+- รายละเอียดทั้งหมดอยู่ใน [backend/README.md](backend/README.md)
 
 ## สถาปัตยกรรมที่วางแผนไว้ (สำคัญต่อบริบทการทำงาน)
 
@@ -47,11 +63,11 @@ USB Serial — เพื่อพัฒนา/ทดสอบให้เสร�
 - Action ของหุ่นยนต์ที่ต้องรองรับใน v1: `HEAD_NOD`, `HEAD_SHAKE`, `LOOK_LEFT/RIGHT`,
   `LOOK_UP/DOWN`, `BLINK`, `IDLE` — รายการนี้คือ baseline ห้ามตัดออกหากไม่ได้ตกลงกับผู้ใช้ก่อน
 
-## Stack ที่ตั้งใจใช้ (ตามเอกสาร — ยังไม่มีโค้ดยืนยัน)
+## Stack
 
-- **ESP32-S3 firmware**: VS Code + PlatformIO
-- **robot-brain** (รันบน PC ระหว่างพัฒนา / Pi 5 ตอน production): Python หรือ Node.js
-- **Backend API**: Bun
+- **Backend API** ✅ มีโค้ดจริง: Bun + Hono + TypeScript + PostgreSQL — ดู [backend/](backend/)
+- **ESP32-S3 firmware**: ยังเป็นแผน — ตั้งใจใช้ VS Code + PlatformIO
+- **robot-brain** (รันบน PC ระหว่างพัฒนา / Pi 5 ตอน production): ยังเป็นแผน — Python หรือ Node.js
 
-> หมายเหตุ: รายการข้างต้นมาจากเอกสารวางแผน หากเริ่มเขียนโค้ดจริง ให้ตรวจสอบ
-> `package.json` / `requirements.txt` / `platformio.ini` เพื่อยืนยัน stack ที่ใช้จริงก่อนเสมอ
+> ส่วนที่ยังไม่มีโค้ด (robot-brain, ESP32 firmware) ให้ตรวจสอบ `package.json` /
+> `requirements.txt` / `platformio.ini` เพื่อยืนยัน stack จริงก่อนเสมอ เมื่อเริ่มมีโค้ด
